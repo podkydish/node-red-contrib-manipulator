@@ -1,0 +1,27 @@
+{
+    "name": "node-red-contrib-manipulator",
+    "version": "0.0.1",
+    "description": "2d manipulator Node-RED UI widget",
+    "author": "Andrey Andreev",
+    "license": "Apache",
+    "main": "manipulator.js",
+    "node-red": {
+        "nodes": {
+            "ui_manipulator_state": "manipulator.js"
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
+    "keywords": [
+        "ui",
+        "button",
+        "state",
+        "selection",
+        "nodered",
+        "node",
+        "red",
+        "node-red"
+    ]
+}

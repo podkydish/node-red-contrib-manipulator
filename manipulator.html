@@ -1,0 +1,43 @@
+<script type="text/x-red" data-template-name="ui_manipulator_widget">
+    <div class="form-row" id="template-row-group">
+        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+        <input type="text" id="node-input-group">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType("ui_manipulator_widget", {
+        category: 'dashboard',
+        color: 'rgb( 63, 173, 181)',
+        defaults: {
+            group: { type: 'ui_group', required: true },
+            radius: { value: 50 },
+            order: { value: 10 },
+            fillColor: { value: "#ffcc00" },
+            lineColor: { value: "#000000" },
+            width: {
+                value: 0,
+                validate: function (v) {
+                    var valid = true;
+                    var width = v || 0;
+                    var currentGroup = $('#node-input-group').val() || this.group;
+                    var groupNode = RED.nodes.node(currentGroup);
+                    valid = !groupNode || +width <= +groupNode.width;
+                    return valid;
+                }
+            },
+            height: { value: 0 },
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "icon.png",
+        paletteLabel: "Manipulator",
+        label: function () { return "Manipulator"; },
+        oneditprepare: function () {
+            $('#node-input-group').val(this.group || "");
+        },
+        oneditsave: function () {
+            this.group = $('#node-input-group').val();
+        },
+    });
+</script>
