@@ -1,37 +1,61 @@
 module.exports = function (RED) {
     var generateHTML = function () {
-        var HTML = String.raw`<div style="width: 200px; height: 200px; position: relative;" id="circleLineWidgetContainer">`;
+        var HTML = String.raw`<div style="width: 500px; height: 400px; position: relative;" id="circleLineWidgetContainer">`;
         HTML += String.raw`
-        <div id="circle" style="width: 20px; 
-        height: 20px; border-radius: 50%; 
-        background-color: yellow; 
-        position: absolute; 
-        top: 90px; 
-        left: 90px;">
+        <button id="resetButton" style="position: absolute; 
+        top: 10px; 
+        left: 0;">Сброс</button>
+
+        <div id="cube" style = "
+        position:absolute;
+        top: 10px;
+        left: 70px;
+        background-color: blue;
+        width: 30px;
+        height: 20px;
+        ">
         </div>
-        <div class="line" id="line" style="
-        height: 30px;
+
+
+        <canvas id="myCanvas" width="500" height="350" style="
+        position:absolute; 
+        top:50px; 
+        left:0;">
+        </canvas>
+        
+        <div id="manipulator" style="
+        width: 50px; 
+        height: 50px; 
+        border-radius: 50%; 
+        background-color: black; 
+        position: absolute; 
+        top: 200px; 
+        left: 85px;">
+        </div>
+
+        <div class="circle" id="circle" style="
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: yellow;
         position: absolute;
-        top: 70px; 
+        top: 50px; 
         left: 100px;
-        background: #000;
-        transform-origin: bottom center;
-        width: 2px;
-        "></div>
+        ">
+        </div>
         `;
         HTML += "</div>";
         return HTML;
     }
 
     var ui = undefined;
-
     function ManipulatorWidget(config) {
         try {
             var node = this;
             if (ui === undefined) {
                 ui = RED.require("node-red-dashboard")(RED);
             }
-
+            
             RED.nodes.createNode(this, config);
             var done = ui.addWidget({
                 node: node,
@@ -46,30 +70,47 @@ module.exports = function (RED) {
                 width: config.width,
                 height: config.height,
 
-                initController: function ($scope, events) {
-                    var line = document.getElementById('line');
-                    var circle = document.getElementById('circle');
-                    const parentContainer = document.getElementById('circleLineWidgetContainer');
+                initController: function ($scope) {
+                    var prevX = 100;
+                    var prevY = 0;  
+                    var staticHeight = 215;
+                    var staticLeft = 100;
+                    var hand = document.getElementById('circle');
+                    var resetButton = document.getElementById('resetButton');
+                    var lamp = document.getElementById('cube');
+                    var canvas = document.getElementById('myCanvas');
+                    var ctx = canvas.getContext('2d');
+                    
                     $scope.$watch('msg', function (msg) {
                         if (msg) {
-                            if(msg.payload.X!= null &&msg.payload.Y!=null){
-                            var point1 = { x: parentContainer.offsetWidth / 2, y: parentContainer.offsetHeight / 2 };
-                            var point2 = { x: msg.payload.X, y: msg.payload.Y }; // Вторая точка
-                            var angle = Math.atan2(point2.y - point1.y, point2.x - point1.x);
-                            line.style.transform = 'rotate(' + angle + 'rad)';
+                            if(msg.payload.X!= null && msg.payload.Y!=null && msg.payload.X<=350 &&
+                                 msg.payload.X>=0 && msg.payload.Y<=150 && msg.payload.Y>=-150){
+                                    ctx.beginPath();
+                                    ctx.moveTo(prevX+10, prevY+10);
+                                    ctx.lineTo(staticLeft+msg.payload.X+10, staticHeight+msg.payload.Y-40);
+                                    ctx.strokeStyle = 'red'; 
+                                    ctx.stroke();
+                                
+                                hand.style.left = staticLeft+msg.payload.X +'px';
+                                hand.style.top = staticHeight+msg.payload.Y + 'px';
+                                
+                                prevX = staticLeft+msg.payload.X;
+                                prevY = staticHeight+msg.payload.Y - 50;
+                                lamp.style.backgroundColor = 'blue';      
+                            } else{
+                                lamp.style.backgroundColor='red';
                             }
                             if(msg.payload.V==1){
-                                console.log('green');
-                                circle.style.backgroundColor='green';
+                                hand.style.backgroundColor='green';
                             }else{
-                                console.log('yellow');
-                                circle.style.backgroundColor='yellow';
-
+                                hand.style.backgroundColor='yellow';
                             }
                         }
                     });
                     
-
+                    resetButton.addEventListener('click', function() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    });
                     $scope.send = function (msg) {
                         $scope.send(msg);
                     };
