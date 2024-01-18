@@ -15,8 +15,7 @@ module.exports = function (RED) {
         height: 20px;
         ">
         </div>
-
-
+        
         <canvas id="myCanvas" width="500" height="350" style="
         position:absolute; 
         top:50px; 
@@ -81,17 +80,54 @@ module.exports = function (RED) {
                     var lamp = document.getElementById('cube');
                     var canvas = document.getElementById('myCanvas');
                     var ctx = canvas.getContext('2d');
+                    var xDiff = 0;
+                    var yDiff = 0;
+                    var lowX = 0;
+                    var lowY = 0;
+                    var startTime;
+                    var animationDuration = 10000;
+
+                    function animateLineDrawing() {
+                        if (!startTime) {
+                            startTime = Date.now();
+                        }
+
+                        var currentTime = Date.now();
+                        var elapsed = currentTime - startTime;
+                        var progress = elapsed / animationDuration;
+
+                        if (progress > 1) {
+                            progress = 1;
+                        }
+
+                        var currentX = prevX + 10 + xDiff * 0.0001;
+                        var currentY = prevY + 10 + yDiff * 0.0001;
+
+                        ctx.beginPath();
+                        ctx.moveTo(lowX, lowY);
+                        ctx.lineTo(currentX, currentY);
+                        ctx.strokeStyle = 'red';
+                        ctx.stroke();
+                        lowX = currentX;
+                        lowY = currentY;
+
+                        if (progress < 1) {
+                            requestAnimationFrame(animateLineDrawing);
+                        } else {
+                            startTime = null;
+                        }
+                    }
 
                     $scope.$watch('msg', function (msg) {
                         if (msg) {
                             if (msg.payload.X != null && msg.payload.Y != null && msg.payload.X <= 350 &&
                                 msg.payload.X >= 0 && msg.payload.Y <= 150 && msg.payload.Y >= -150) {
+                                xDiff = staticLeft + msg.payload.X - prevX;
+                                yDiff = staticHeight + msg.payload.Y - prevY - 50;
+                                lowX = prevX + 10;
+                                lowY = prevY + 10;
 
-                                ctx.beginPath();
-                                ctx.moveTo(prevX + 10, prevY + 10);
-                                ctx.lineTo(staticLeft + msg.payload.X + 10, staticHeight + msg.payload.Y - 40);
-                                ctx.strokeStyle = 'red';
-                                ctx.stroke();
+                                animateLineDrawing();
 
                                 hand.style.left = staticLeft + msg.payload.X + 'px';
                                 hand.style.top = staticHeight + msg.payload.Y + 'px';
