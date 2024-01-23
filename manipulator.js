@@ -120,20 +120,34 @@ module.exports = function (RED) {
 
                     $scope.$watch('msg', function (msg) {
                         if (msg) {
-                            if (msg.payload.X != null && msg.payload.Y != null && msg.payload.X <= 350 &&
-                                msg.payload.X >= 0 && msg.payload.Y <= 150 && msg.payload.Y >= -150) {
-                                xDiff = staticLeft + msg.payload.X - prevX;
-                                yDiff = staticHeight + msg.payload.Y - prevY - 50;
+                            if (
+                                msg.payload.X != null &&
+                                msg.payload.Y != null &&
+                                msg.payload.X <= 350 &&
+                                ((msg.payload.X >= 50 && msg.payload.Y <= 150 && msg.payload.Y >= -150) ||
+                                  (msg.payload.Y > 50 || msg.payload.Y < -50))
+                              ){
+                                    let x = Number(msg.payload.X);
+                                    let y = Number(msg.payload.Y);
+                                xDiff = staticLeft + x - prevX;
+                                yDiff = staticHeight + y - prevY - 50;
                                 lowX = prevX + 10;
                                 lowY = prevY + 10;
-
+                                console.log('x=' + x);
+                                console.log('y=' + y);
                                 animateLineDrawing();
 
-                                hand.style.left = staticLeft + msg.payload.X + 'px';
-                                hand.style.top = staticHeight + msg.payload.Y + 'px';
+                                console.log('staticHeight=' + staticHeight);
+                                console.log('staticLeft=' + staticLeft);
 
-                                prevX = staticLeft + msg.payload.X;
-                                prevY = staticHeight + msg.payload.Y - 50;
+                                console.log('left=' + (staticLeft + x));
+                                console.log('top=' + (staticHeight + y));
+
+                                hand.style.left = staticLeft + x + 'px';
+                                hand.style.top = staticHeight + y + 'px';
+
+                                prevX = staticLeft + x;
+                                prevY = staticHeight + y - 50;
                                 lamp.style.backgroundColor = 'blue';
                             } else {
                                 lamp.style.backgroundColor = 'red';
